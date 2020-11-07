@@ -14,14 +14,14 @@ def extract():
     data = json.loads(request.data)
 
     driver = webdriver.Chrome('chromedriver')
-    driver.get(str(data['url']))#특정 클립 링크
+    driver.get(str(data['url']))
 
     time.sleep(3)
 
     file_list = []
     zipObj = ZipFile(str(data['filename']) +'.zip', 'w')
 
-    #img 태그 확인
+
     url_element = driver.find_elements_by_xpath('//img[@*]')
     for item in url_element:
         img_url = item.get_attribute('src')
@@ -32,7 +32,7 @@ def extract():
         zipObj.write("./extract/"+str(img_title)+'.png')
         file_list.append(str(img_title)+'.png')
 
-    #video 태그 확인
+
     url_element = driver.find_elements_by_xpath('//video[@*]')
     for item in url_element:
         vid_url = item.get_attribute('src')

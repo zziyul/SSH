@@ -1,0 +1,711 @@
+swagger: "2.0"
+info:
+  version: "0.0.1"
+  title: SaltRiver
+# during dev, should point to your local machine
+host: localhost:10010
+# basePath prefixes all resource paths
+basePath: /
+#
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+  - multipart/form-data
+  - application/x-www-form-urlencoded
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /login:
+    x-swagger-router-controller: user
+    post:
+      tags:
+        - user
+      description: 로그인하기
+      operationId: login
+      summary: 로그인하기
+      parameters:
+        - in: body
+          name: admin
+          description: The admin to create.
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: 아이디
+              password:
+                type: string
+                description: 비밀번호
+      responses:
+        "200":
+          description: Login
+          schema:
+            $ref: "#/definitions/LoginResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /user:
+    x-swagger-router-controller: user
+    get:
+      tags:
+        - user
+      description: Find Firend
+      operationId: findUser
+      security:
+        - jwt: []
+      parameters:
+        - name: search_text
+          in: query
+          description: search_text
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - user
+      description: 회사를 처음으로 등록하는 사람은 자동으로 관리자 권한을 갖게 됩니다.
+      operationId: addUser
+      summary: 관리자를 등록할 때 사용하는 api
+      parameters:
+        - in: body
+          name: admin
+          description: 회원 가입시 입력하는 정보
+          schema:
+            type: object
+            properties:
+              info:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: 사용자가 입력한 id
+                  pw:
+                    type: string
+                    description: 사용자가 입력한 비밀번호
+                  name:
+                    type: string
+                    description: 사용자의 이름
+                  email:
+                    type: string
+                    description: 사용자의 이메일
+                  phone:
+                    type: string
+                    description: 사용자의 핸드폰 번호
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      tags:
+        - user
+      description: 회사를 처음으로 등록하는 사람은 자동으로 관리자 권한을 갖게 됩니다.
+      operationId: patchUser
+      security:
+        - jwt: []
+      summary: 유저 정보 수정
+      parameters:
+        - in: body
+          name: admin
+          description: 회원 가입시 입력하는 정보
+          schema:
+            type: object
+            properties:
+              info:
+                type: object
+                properties:
+                  pw:
+                    type: string
+                    description: 사용자가 입력한 비밀번호
+                  name:
+                    type: string
+                    description: 사용자의 이름
+                  email:
+                    type: string
+                    description: 사용자의 이메일
+                  phone:
+                    type: string
+                    description: 사용자의 핸드폰 번호
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /token:
+    x-swagger-router-controller: user
+    get:
+      tags:
+        - user
+      description: 토큰에 대한 정보를 반환한다.
+      operationId: checkToken
+      security:
+        - jwt: []
+      summary: 토큰 유효성 검증
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /id:
+    x-swagger-router-controller: user
+    post:
+      tags:
+        - user
+      description: 희망하는 아이디를 사용 가능한지 확인할 수 있는 함수
+      operationId: checkID
+      summary: 아이디 중복 체크
+      parameters:
+        - name: id
+          in: query
+          description: 사용하고자 하는 아이디
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /relation:
+    x-swagger-router-controller: friend
+    get:
+      tags:
+        - friend
+      description: 관계 등록 한 데이터에서 전체 받아오기
+      operationId: getRelations
+      security:
+        - jwt: []
+      parameters:
+        - name: search_text
+          in: query
+          description: search_text
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - friend
+      description: 신규 관계 등록시 작동하는 api
+      operationId: addRelations
+      security:
+        - jwt: []
+      parameters:
+        - name: id
+          in: body
+          description: friend_id
+          schema:
+            type: string
+            description : friend_id
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      tags:
+        - friend
+      description: 관계 상태 업데이트
+      operationId: setRelation
+      summary: 관계 상태 업데이트
+      security:
+        - jwt: []
+      parameters:
+        - name: relation
+          in: body
+          description: CorpCode(send relation offer)
+          schema:
+            type: object
+            properties:
+              idx:
+                type: integer
+                description: 상태를 변경하고자 하는 관계의 인덱스
+              stat:
+                type: string
+                description: 변경하고자 하는 상태 (요청/승인/거절)
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - friend
+      description: Delete relation API
+      operationId: deleteRelation
+      security:
+        - jwt: []
+      parameters:
+        - name: idx
+          in: query
+          description: Index that we wanted to delete
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /file:
+    x-swagger-router-controller: file
+    post:
+      operationId: addimageFile
+      tags:
+        - upload
+      consumes:
+        - multipart/form-data
+      parameters:
+        - in: formData
+          name: file
+          description: The file to upload
+          type: file
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SuccessResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /file/{fileName}:
+    x-swagger-router-controller: file
+    get:
+      operationId: getImageFile
+      tags:
+        - upload
+      produces:
+        - image
+        - image/png
+        - image/gif
+        - image/jpeg
+      parameters:
+        - name: fileName
+          in: path
+          description: file name
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            type: file
+  /note:
+    x-swagger-router-controller: note
+    get:
+      tags:
+        - note
+      description: 전체 노트 받아오기
+      operationId: getNotes
+      security:
+        - jwt: []
+      parameters:
+        - name: note_idx
+          in: query
+          description: 조회하고 싶은 특정 노트 인덱스
+          required: false
+          type: string
+        - name: url
+          in: query
+          description: 사용자가 조회하고 싶은 url 정보
+          required: false
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - note
+      description: 신규 노트 등록시 작동하는 api
+      operationId: addNote
+      security:
+        - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              url:
+                type: string
+                description: 노트한 사이트 url
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      tags:
+        - note
+      description: 노트 업데이트
+      operationId: patchNote
+      summary: 노트 업데이트
+      security:
+        - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              idx:
+                type: integer
+                description: 상태를 변경하고자 하는 관계의 인덱스
+              url:
+                type: string
+                description: 노트한 사이트 url
+              draw_url:
+                type: string
+                description: draw 파일
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - note
+      description: Delete relation API
+      operationId: deleteNote
+      # security:
+      #   - jwt: []
+      parameters:
+        - name: idx
+          in: query
+          description: Index that we wanted to delete
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /note/share:
+    x-swagger-router-controller: note
+    get:
+      tags:
+        - note
+      description: 전체 노트 받아오기
+      operationId: getShareNotes
+      security:
+        - jwt: []
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      tags:
+        - note
+      description: 공유 리스트
+      operationId: addShare
+      security:
+        - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                description: 공유 하고자 하는 상대의 아이디값
+              note_idx:
+                type: integer
+                description: 노트 고유 idx 값
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - note
+      description: Delete relation API
+      operationId: disconnectSharing
+      security:
+        - jwt: []
+      parameters:
+        - name: idx
+          in: query
+          description: Index that we wanted to delete
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /note/shared:
+    x-swagger-router-controller: note
+    get:
+      tags:
+        - note
+      description: 전체 노트 받아오기
+      operationId: getSharedNoteContents
+      security:
+        - jwt: []
+      parameters:
+        - name: url
+          in: query
+          description: 사용자가 방문한 url 정보
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /note/draw:
+    x-swagger-router-controller: note
+    post:
+      tags:
+        - note
+      description: 필기 내용을 입력할 때 사용되는 url
+      operationId: addDraw
+      # security:
+      #   - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              note_idx:
+                type: integer
+                description: 사용자가 메모를 한 노트의 인덱스
+              draw_url:
+                type: string
+                description: 필기를 해서 생성된 파일의 url
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /note/memo:
+    x-swagger-router-controller: note
+    post:
+      tags:
+        - note
+      description: 메모를 새로 추가할 때 사용되는 api로 return 값으로 memo 고유의 인덱스(idx)값을 준다. 해당 메모에 대한 수정등의 요청시 해당 인덱스 값을 보내주어야 한다.
+      operationId: addMemo
+      # security:
+      #   - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              note_idx:
+                type: integer
+                description: 사용자가 메모를 한 노트의 인덱스
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    patch:
+      tags:
+        - note
+      description: 기존에 사용된 메모 내용을 수정할 때 사용되는 api
+      operationId: patchMemo
+      # security:
+      #   - jwt: []
+      parameters:
+        - name: info
+          in: body
+          description: Note Info
+          schema:
+            type: object
+            properties:
+              memo_idx:
+                type: integer
+                description: 사용자가 메모를 한 노트의 인덱스
+              content:
+                type: string
+                description: 사용자 메모 내용
+              top:
+                type: number
+                description: 메모의 좌표 값(y)
+              left:
+                type: number
+                description: 메모의 좌표 값(x)
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      tags:
+        - note
+      description: 기존에 사용된 메모 내용을 수정할 때 사용되는 api
+      operationId: deleteMemo
+      # security:
+      #   - jwt: []
+      parameters:
+        - name: memo_idx
+          in: query
+          description: 메모 인덱스
+          required: true
+          type: integer
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/RelationResponse"
+        default:
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /swagger:
+    x-swagger-pipe: swagger_raw
+securityDefinitions:
+  jwt:
+    type: apiKey
+    in: header
+    name: jwt
+# complex objects have schema definitions
+definitions:
+  LoginResponse:
+    properties:
+      data:
+        type: object
+        properties:
+          token:
+            type: string
+            description: 성공 여부
+          user_name:
+            type: string
+            description: 유저의 이름
+          user_type:
+            type: array
+            description: 유저가 가진 회사 타입
+            items :
+              type : string
+  SuccessResponse:
+    properties:
+      data:
+        type: object
+        properties:
+          success:
+            type: boolean
+            description: 성공 여부
+          message:
+            type: string
+            description: 메시지
+  RelationResponse:
+    properties:
+      data:
+        type: string
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
